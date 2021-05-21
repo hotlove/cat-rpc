@@ -1,6 +1,8 @@
 package com.guo.rpc.server.handler;
 
 import com.guo.rpc.codec.ServiceRemoteInvokeRequest;
+import com.guo.rpc.service.util.MethodInfo;
+import com.guo.rpc.service.util.ServiceInfo;
 import com.guo.rpc.test.service.ServiceMap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,10 +24,13 @@ public class ServiceRemoteInvokeHandler extends SimpleChannelInboundHandler<Serv
     protected void channelRead0(ChannelHandlerContext ctx, ServiceRemoteInvokeRequest msg) throws Exception {
         String serviceName = msg.getServiceName();
 
-        Object service = ServiceMap.INSTANCE.getService(serviceName);
-        Method method = service.getClass().getMethod(msg.getMethodName(), msg.getParameterTypes());
-        Object invokeResult = method.invoke(service, msg.getArgs());
+        ServiceInfo serviceInfo = ServiceMap.INSTANCE.getService(serviceName);
+        MethodInfo methodInfo = serviceInfo.getMethodInfos().get(msg.getMethodName());
 
-        ctx.writeAndFlush(invokeResult);
+        Method methodInvoker = serviceInfo.getServiceInstance().getClass().getMethod(methodInfo.getMethodName(), methodInfo.getParameterTypes());
+
+        Object invoke = methodInvoker.invoke(serviceInfo.getServiceInstance(), msg.getArgs());
+
+        ctx.writeAndFlush(invoke);
     }
 }
