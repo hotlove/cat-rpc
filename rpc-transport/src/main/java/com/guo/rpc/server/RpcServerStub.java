@@ -29,7 +29,7 @@ public class RpcServerStub {
                     @Override
                     protected void initChannel(NioSocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast(Spliter.INSTANCE)
+                        pipeline.addLast(new Spliter())
                                 .addLast(PacketCodecHandler.INSTANCE);
                     }
                 });
@@ -41,3 +41,6 @@ public class RpcServerStub {
         }
     }
 }
+
+
+
